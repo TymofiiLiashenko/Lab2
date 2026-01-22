@@ -1,1 +1,121 @@
+# Програма: Порівняльний аналіз шифрів
+# Автор: Тимофiй Ляшенко
+# Алгоритми: Шифр Цезаря та Шифр Віженера
+# Ключі генеруються з персональних даних
 
+# -------------------------
+# 1. Генерація ключів
+# -------------------------
+
+def generate_caesar_shift(birthdate: str) -> int:
+    """Обчислює зсув для Цезаря як суму цифр дати народження."""
+    digits = [int(c) for c in birthdate if c.isdigit()]
+    return sum(digits) % 26  # щоб не перевищував кількість букв
+
+
+def generate_vigenere_key(surname: str) -> str:
+    """Ключ для Віженера — прізвище у верхньому регістрі."""
+    return surname.upper()
+
+
+# -------------------------
+# 2. Алгоритм Цезаря
+# -------------------------
+
+def caesar_encrypt(text: str, shift: int) -> str:
+    result = ""
+    for char in text:
+        if char.isalpha():
+            base = ord('А') if 'А' <= char <= 'Я' else ord('а')
+            # кирилиця: 32 літери
+            result += chr((ord(char) - base + shift) % 32 + base)
+        else:
+            result += char
+    return result
+
+
+def caesar_decrypt(cipher: str, shift: int) -> str:
+    return caesar_encrypt(cipher, -shift)
+
+
+# -------------------------
+# 3. Алгоритм Віженера
+# -------------------------
+
+def vigenere_encrypt(text: str, key: str) -> str:
+    result = ""
+    key = key.upper()
+    key_index = 0
+    for char in text:
+        if char.isalpha():
+            base = ord('А') if char.isupper() else ord('а')
+            shift = (ord(key[key_index % len(key)]) - ord('А')) % 32
+            result += chr((ord(char) - base + shift) % 32 + base)
+            key_index += 1
+        else:
+            result += char
+    return result
+
+
+def vigenere_decrypt(cipher: str, key: str) -> str:
+    result = ""
+    key = key.upper()
+    key_index = 0
+    for char in cipher:
+        if char.isalpha():
+            base = ord('А') if char.isupper() else ord('а')
+            shift = (ord(key[key_index % len(key)]) - ord('А')) % 32
+            result += chr((ord(char) - base - shift) % 32 + base)
+            key_index += 1
+        else:
+            result += char
+    return result
+
+
+# -------------------------
+# 4. Демонстрація роботи
+# -------------------------
+
+# Вхідні дані
+surname = "Шевченко"
+birthdate = "15.03.1995"
+text = "Безпека програм та даних – важлива дисципліна"
+
+# Генерація ключів
+caesar_shift = generate_caesar_shift(birthdate)
+vigenere_key = generate_vigenere_key(surname)
+
+# Шифрування
+caesar_encrypted = caesar_encrypt(text, caesar_shift)
+vigenere_encrypted = vigenere_encrypt(text, vigenere_key)
+
+# Розшифрування
+caesar_decrypted = caesar_decrypt(caesar_encrypted, caesar_shift)
+vigenere_decrypted = vigenere_decrypt(vigenere_encrypted, vigenere_key)
+
+# -------------------------
+# 5. Порівняльний аналіз
+# -------------------------
+
+print("=== ПОРІВНЯЛЬНИЙ АНАЛІЗ ШИФРІВ ===\n")
+print(f"Тестовий текст: {text}\n")
+print(f"Дата народження: {birthdate} → Зсув Цезаря = {caesar_shift}")
+print(f"Прізвище: {surname} → Ключ Віженера = {vigenere_key}\n")
+
+print("Шифр Цезаря:")
+print("Шифрований текст:", caesar_encrypted)
+print("Розшифрований текст:", caesar_decrypted, "\n")
+
+print("Шифр Віженера:")
+print("Шифрований текст:", vigenere_encrypted)
+print("Розшифрований текст:", vigenere_decrypted, "\n")
+
+print("=== Таблиця порівняння ===")
+print(f"{'Метод':<15}{'Довжина':<10}{'Читабельність':<15}{'Складність ключа':<20}")
+print(f"{'Цезарь':<15}{len(caesar_encrypted):<10}{'Висока':<15}{'Низька (числова)':<20}")
+print(f"{'Віженер':<15}{len(vigenere_encrypted):<10}{'Низька':<15}{'Вища (текстова)':<20}")
+
+print("\n=== Висновки ===")
+print("Шифр Цезаря простий у реалізації, але легко зламується частотним аналізом.")
+print("Шифр Віженера має складнішу структуру ключа, що підвищує стійкість.")
+print("Однак обидва методи вважаються слабкими для сучасних стандартів безпеки.\n")
